@@ -1,0 +1,5 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sendungsverfolgung · Emergency Delivery</title>
+<style>body{font-family:system-ui;margin:0;background:#f4f6f8}.wrap{max-width:800px;margin:auto;padding:24px}.card{background:#fff;padding:20px;border-radius:16px;margin:12px 0}</style></head><body><div class="wrap"><h1>Sendungsverfolgung</h1><div id="app">Lade Status…</div></div>
+<script>
+async function load(){const token=location.pathname.split('/').pop();const r=await fetch('/api/tracking-v128/'+encodeURIComponent(token));const d=await r.json();if(!r.ok){app.textContent=d.error;return}app.innerHTML='<div class="card"><h2>'+d.trip_number+'</h2><b>Status: '+d.status+'</b><p>'+ (d.route||'')+'</p><small>Letztes Update: '+new Date(d.updated_at).toLocaleString()+'</small></div><div class="card"><h3>Stopps</h3>'+d.stops.map(s=>'<p><b>'+s.order+'.</b> '+s.address+' · '+(s.delivered_at?'Zugestellt':s.actual_arrival_at?'Angekommen':'Geplant')+'</p>').join('')+'</div>'; }load();setInterval(load,30000);
+</script></body></html>

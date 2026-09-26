@@ -1,0 +1,13 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>DDT Zustellnachweis</title>
+<style>body{font-family:Arial,sans-serif;margin:0;background:#eee;color:#111}.page{background:#fff;max-width:850px;margin:20px auto;padding:35px;box-sizing:border-box}.head{display:flex;justify-content:space-between;border-bottom:2px solid #111;padding-bottom:15px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:18px 0}.stop{border:1px solid #bbb;padding:12px;margin:10px 0;break-inside:avoid}.proof{display:grid;grid-template-columns:1fr 1fr;gap:10px}.proof img{max-width:100%;max-height:180px}.sig{max-width:320px;max-height:120px;border:1px solid #aaa}@media print{body{background:#fff}.page{margin:0;max-width:none;box-shadow:none}@page{size:A4;margin:12mm}}</style></head>
+<body><div class="page" id="app">Lade …</div><script>
+const id=new URLSearchParams(location.search).get('id'),token=localStorage.getItem('token')||'';
+fetch('/api/driver/stop-v85/ddt/'+id,{headers:{Authorization:'Bearer '+token}}).then(r=>r.json()).then(d=>{
+if(d.error){app.textContent=d.error;return} const t=d.trip;
+app.innerHTML=`<div class="head"><div><h1>DELIVERY NOTE / DDT</h1><b>Emergency Delivery</b></div><div><b>Tour:</b> ${t.trip_number}<br><b>Datum:</b> ${new Date().toLocaleDateString('it-IT')}</div></div>
+<div class="grid"><div><b>Kunde</b><br>${t.customer_company||''}<br>${t.customer_address||''}<br>${t.customer_city||''}<br>P.IVA: ${t.customer_vat||''}</div>
+<div><b>Fahrer</b><br>${t.driver_name||''}<br><b>Fahrzeug:</b> ${t.vehicle_name||''} ${t.plate||''}<br><b>Status:</b> ${t.status}</div></div>
+<h2>Zustellstellen</h2>${d.stops.map((s,i)=>`<div class="stop"><b>${i+1}. ${s.customer_name||''}</b><br>${s.address}<br><b>Zustellung:</b> ${s.delivered_at||'—'} · <b>KG:</b> ${s.delivered_kg||0} · <b>Stück:</b> ${s.delivered_pieces||0}<br><b>Notiz:</b> ${s.delivery_note||'—'}<div class="proof">${s.delivery_photo?'<div><b>Foto</b><br><img src="'+s.delivery_photo+'"></div>':''}${s.signature_data?'<div><b>Unterschrift</b><br><img class="sig" src="'+s.signature_data+'"></div>':''}</div><small>GPS: ${s.proof_lat||'—'}, ${s.proof_lng||'—'} · Genauigkeit: ${s.proof_accuracy||'—'} m · Serverzeit: ${s.proof_at||'—'}</small></div>`).join('')}
+<p><b>Gesamtgewicht:</b> ${d.stops.reduce((a,s)=>a+Number(s.delivered_kg||0),0).toFixed(2)} KG &nbsp; <b>Gesamtstücke:</b> ${d.stops.reduce((a,s)=>a+Number(s.delivered_pieces||0),0)}</p>
+<button onclick="print()" style="padding:10px 18px">A4 drucken / PDF</button>`}).catch(e=>app.textContent=e.message)
+</script></body></html>
