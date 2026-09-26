@@ -1,0 +1,2 @@
+self.addEventListener('push',event=>{let d={title:'Emergency Delivery',body:'Neue Benachrichtigung'};try{d=event.data.json()}catch(e){}event.waitUntil(self.registration.showNotification(d.title,{body:d.body||'',tag:d.tag||'emergency-delivery',data:d.data||{}}))});
+self.addEventListener('notificationclick',event=>{event.notification.close();event.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(cs=>cs.length?cs[0].focus():clients.openWindow('/')))});

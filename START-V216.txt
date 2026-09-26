@@ -1,0 +1,27 @@
+EMERGENCY DELIVERY V216 – BLITZ.CLOUD
+
+Diese Version ist speziell für blitz.cloud vorbereitet.
+
+Neu in V216:
+- Managed PostgreSQL über DATABASE_URL
+- Port 8080 / 0.0.0.0 für blitz.cloud
+- kein Root-Prozess
+- Dockerfile im Projekt-Hauptverzeichnis
+- Health-Endpunkt /api/health
+- bestehende Emergency-Delivery-Funktionen und Benutzerrechte bleiben erhalten
+- lokale PGlite-Datenbank bleibt für Desktop-Betrieb erhalten
+- keine neue E-Mail-Funktion
+
+BLITZ:
+1. Projekt öffentlich auf GitHub ablegen.
+2. In blitz.cloud: Host something new -> My own code.
+3. GitHub-Repository eintragen.
+4. App-Namen wählen, z.B. emergency-delivery.
+5. Build it and put it online.
+6. PostgreSQL als Managed Database verbinden.
+7. DATABASE_URL wird von blitz.cloud bereitgestellt.
+
+WICHTIG:
+- Die kostenlose blitz.cloud-Adresse ist eine *.blitz.cloud-Adresse.
+- Eine eigene Domain ist laut aktuellem blitz.cloud-Stand erst im Pro-Tarif verfügbar.
+- Das kostenlose Angebot kann Apps nach 2 Stunden ohne Besucher schlafen legen.
