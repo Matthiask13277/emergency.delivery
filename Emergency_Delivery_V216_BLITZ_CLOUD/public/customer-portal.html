@@ -1,0 +1,24 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Emergency Delivery · Kundenportal</title>
+<style>body{font-family:system-ui;margin:0;background:#f4f6f8;color:#18202a}.wrap{max-width:900px;margin:auto;padding:24px}.card{background:white;border-radius:16px;padding:20px;margin:14px 0;box-shadow:0 2px 12px #0001}button{padding:11px 16px;border:0;border-radius:10px;background:#18202a;color:white}input{padding:12px;border:1px solid #ccd2da;border-radius:10px;width:100%;box-sizing:border-box}</style></head>
+<body><div class="wrap"><h1>Emergency Delivery</h1><div class="card"><h2>Kundenportal</h2><input id="token" placeholder="Portal-Token"><br><br><button onclick="login()">Anmelden</button><div id="msg"></div></div><div id="app"></div></div>
+<script>
+let token="";
+async function login(){token=document.getElementById('token').value.trim();const r=await fetch('/api/customer-portal-v128/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});const d=await r.json();if(!r.ok){msg.textContent=d.error;return}msg.textContent='Angemeldet als '+d.company;load();}
+async function load(){const r=await fetch('/api/customer-portal-v127/overview',{headers:{Authorization:'Bearer '+token}}),d=await r.json();app.innerHTML='<div class="card"><h2>Aufträge</h2>'+d.trips.map(t=>'<div><b>'+t.trip_number+'</b> · '+t.status+'<br>'+t.stops.map(s=>s.order+'. '+s.address+' · '+(s.delivered_at?'zugestellt':(s.arrival_variance_min!=null?s.arrival_variance_min+' min Abweichung':'geplant'))).join('<br>')+'</div><hr>').join('')+'</div><div class="card"><h2>Rechnungen</h2>'+d.invoices.map(i=>'<div><b>'+i.invoice_number+'</b> · '+i.status+' · '+i.gross+' EUR</div>').join('')+'</div><div class="card"><h2>Kommunikation</h2>'+d.communications.map(c=>'<div>'+new Date(c.created_at).toLocaleString()+' · '+c.channel+' · '+c.status+' · '+(c.subject||'')+'</div>').join('')+'</div>';}
+
+async function proof(id){
+ const r=await fetch('/api/customer-portal-v130/delivery-proof/'+id,{headers:{Authorization:'Bearer '+token}}),d=await r.json();
+ if(!r.ok)return alert(d.error||'Fehler');
+ const t=d.trip, stops=t.stops||[];
+ document.getElementById('docs').insertAdjacentHTML('afterbegin',
+ '<div class="card" id="proof"><h3>Digitaler Zustellbeleg · '+t.trip_number+'</h3>'+
+ '<p>Status: '+t.status+' · Signiert: '+(t.signature_at||'—')+'</p>'+
+ '<p>GPS: '+(t.current_lat||'—')+', '+(t.current_lng||'—')+'</p>'+
+ '<p>'+stops.map(s=>s.order+'. '+s.address+' · '+(s.delivered_at?'zugestellt':'offen')).join('<br>')+'</p>'+
+ '<button onclick="window.open(\\'/api/customer-portal-v130/delivery-proof/'+id+'/pdf?token='+encodeURIComponent(token),\\'_blank\\')">DDT / PDF-Ansicht</button>'+
+ (t.signature_data?'<div><p>Unterschrift:</p><img style="max-width:420px;border:1px solid #ccc" src="'+t.signature_data+'"></div>':'')+
+ (t.delivery_photo?'<div><p>Lieferfoto:</p><img style="max-width:420px;border:1px solid #ccc" src="'+t.delivery_photo+'"></div>':'')+
+ '</div>');
+ window.scrollTo({top:document.getElementById('proof').offsetTop,behavior:'smooth'});
+}
+</script></body></html>

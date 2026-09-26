@@ -1,0 +1,11 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Emergency Delivery Kundenportal</title>
+<style>body{font-family:Arial,sans-serif;background:#f5f7fa;margin:0;color:#172033}.wrap{max-width:980px;margin:30px auto;padding:20px}.card{background:#fff;border:1px solid #ddd;border-radius:16px;padding:18px;margin:12px 0}button{padding:9px 12px;border:0;border-radius:8px;cursor:pointer}.row{display:flex;justify-content:space-between;border-bottom:1px solid #eee;padding:10px 0;gap:10px;flex-wrap:wrap}.muted{color:#667085}</style></head>
+<body><div class="wrap"><h1>Emergency Delivery</h1><p class="muted">Kundenportal</p><div id="app">Lade …</div></div>
+<script>
+const token=new URLSearchParams(location.search).get('token')||localStorage.getItem('ed_portal_token');if(token)localStorage.setItem('ed_portal_token',token);
+async function load(){if(!token)return document.getElementById('app').innerHTML='<div class="card">Portal-Token fehlt.</div>';let r=await fetch('/api/portal/summary',{headers:{'X-Portal-Token':token}}),d=await r.json();if(!r.ok)return document.getElementById('app').innerHTML='<div class="card">'+(d.error||'Zugriff verweigert')+'</div>';
+document.getElementById('app').innerHTML='<div class="card"><h2>Rechnungen</h2>'+d.invoices.map(x=>`<div class="row"><span><b>${x.invoice_number}</b><br>${x.issue_date||''}</span><span>${Number(x.gross).toFixed(2)} EUR · ${x.derived_status}</span><button onclick="openInv('${x.id}')">Öffnen</button></div>`).join('')+'</div><div class="card"><h2>DDT / Zustellbelege</h2>'+d.documents.map(x=>`<div class="row"><span><b>${x.document_number}</b><br>${new Date(x.issued_at).toLocaleString()}</span><button onclick="openDdt('${x.id}')">Öffnen</button></div>`).join('')+'</div>'}
+async function openInv(id){let r=await fetch('/api/portal/invoices/'+id,{headers:{'X-Portal-Token':token}}),d=await r.json();let w=open('','_blank');w.document.write(d.pdf_html||'<pre>'+JSON.stringify(d,null,2)+'</pre>');w.document.close()}
+async function openDdt(id){let r=await fetch('/api/portal/ddt/'+id,{headers:{'X-Portal-Token':token}}),d=await r.json();let w=open('','_blank');w.document.write(d.pdf_html||'<pre>'+JSON.stringify(d,null,2)+'</pre>');w.document.close()}
+load();
+</script></body></html>

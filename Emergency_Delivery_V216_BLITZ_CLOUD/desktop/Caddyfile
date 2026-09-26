@@ -1,0 +1,4 @@
+{$ED_DOMAIN} {
+    reverse_proxy emergency-delivery:3000
+    encode gzip
+}
