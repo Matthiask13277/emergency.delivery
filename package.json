@@ -4,7 +4,7 @@
   "private": true,
   "main": "main.js",
   "scripts": {
-    "start": "node server.js"
+   "start": "node start-online.js"
   },
   "build": {
     "appId": "com.emergencydelivery.app",
