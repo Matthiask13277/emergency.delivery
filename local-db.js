@@ -64,12 +64,37 @@ function splitSql(sql){
 const pool={
   async query(text,params=[]){
     // blitz.cloud / online mode: use managed PostgreSQL when DATABASE_URL is present.
-    if(process.env.DATABASE_URL){
-      if(!pgPool){
-        const {Pool}=require("pg");
-        pgPool=new Pool({connectionString:process.env.DATABASE_URL,max:5});
+   if(process.env.DATABASE_URL){
+  if(!pgPool){
+    const {Pool}=require("pg");
+    pgPool=new Pool({
+      connectionString:process.env.DATABASE_URL,
+      max:5,
+      connectionTimeoutMillis:5000
+    });
+  }
+
+  let lastError=null;
+
+  for(let attempt=1;attempt<=60;attempt++){
+    try{
+      return await pgPool.query(text,params);
+    }catch(err){
+      lastError=err;
+
+      console.error(
+        `PostgreSQL noch nicht erreichbar (Versuch ${attempt}/60):`,
+        err.message
+      );
+
+      if(attempt<60){
+        await new Promise(resolve=>setTimeout(resolve,5000));
       }
-      return pgPool.query(text,params);
+    }
+  }
+
+  throw lastError;
+}
     }
     const db=await getDb();
     const statements=splitSql(String(text));
