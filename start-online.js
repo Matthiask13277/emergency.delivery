@@ -1,9 +1,5 @@
 const { execFileSync } = require("node:child_process");
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 async function start() {
   console.log("Emergency Delivery: Warte auf PostgreSQL...");
 
@@ -18,28 +14,28 @@ async function start() {
       await bootstrap();
 
       console.log("Emergency Delivery: Datenbank bereit.");
-      lastError = null;
-      break;
+      console.log("Emergency Delivery: Server wird gestartet...");
+
+      execFileSync(process.execPath, ["server.js"], {
+        stdio: "inherit"
+      });
+
+      return;
     } catch (err) {
       lastError = err;
-
       console.error(
-        `Datenbank noch nicht bereit: ${err.message || err}`
+        `Datenbank noch nicht erreichbar (Versuch ${attempt}/60):`,
+        err.message
       );
 
-      if (attempt === 60) {
-        throw lastError;
+      if (attempt < 60) {
+        await new Promise(resolve => setTimeout(resolve, 5000));
       }
-
-      await sleep(5000);
     }
   }
 
-  console.log("Emergency Delivery: Server wird gestartet...");
-
-  execFileSync(process.execPath, ["server.js"], {
-    stdio: "inherit"
-  });
+  console.error("Online-Start fehlgeschlagen:", lastError);
+  process.exit(1);
 }
 
 start().catch(err => {
