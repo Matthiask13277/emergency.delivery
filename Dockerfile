@@ -11,4 +11,4 @@ ENV PORT=8080
 ENV EMERGENCY_CONFIG_DIR=/tmp/emergency-config
 ENV EMERGENCY_DB_DIR=/tmp/emergency-db
 EXPOSE 8080
-CMD ["node","server.js"]
+CMD ["node", "start-online.js"]
