@@ -130,19 +130,6 @@ async function bootstrap(){
     await pool.query("insert into users(username,name,role,password_hash) values($1,$2,$3,$4) on conflict(username) do nothing",[u[0],u[1],u[2],h]);
   }
   await pool.query("insert into vehicles(name,plate) values('Transporter 1','ED-001'),('Transporter 2','ED-002') on conflict(plate) do nothing");
-  await pool.query("insert into vehicles...");
-
-// ONLINE DATABASE COMPATIBILITY MIGRATIONS
-await runScript(`
-  CREATE TABLE IF NOT EXISTS vehicle_documents(
-    ...
-  );
-
-  ...
-`);
-
+  
 done=true;
-}
-module.exports=bootstrap;done=true;
-}
-module.exports=bootstrap;
+  module.exports=bootstrap;
